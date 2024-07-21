@@ -7,7 +7,6 @@ using Wpf.Ui.Mvvm.Contracts;
 using CommunityToolkit.Mvvm.Input;
 
 using Bloxstrap.UI.Elements.Menu.Pages;
-using Bloxstrap.Enums.FlagPresets;
 
 namespace Bloxstrap.UI.ViewModels.Menu
 {
@@ -23,21 +22,12 @@ namespace Bloxstrap.UI.ViewModels.Menu
         private void OpenFastFlagEditor()
         {
             if (Window.GetWindow(_page) is INavigationWindow window)
-            {
-                if (App.State.Prop.ShowFFlagEditorWarning)
-                    window.Navigate(typeof(FastFlagEditorWarningPage));
-                else
-                    window.Navigate(typeof(FastFlagEditorPage));
-            }
+                window.Navigate(typeof(FastFlagEditorPage));
         }
 
         public ICommand OpenFastFlagEditorCommand => new RelayCommand(OpenFastFlagEditor);
 
-#if DEBUG
-        public Visibility ShowDebugFlags => Visibility.Visible;
-#else
-        public Visibility ShowDebugFlags => Visibility.Collapsed;
-#endif
+        public Visibility ShowDebugFlags => App.Settings.Prop.OhHeyYouFoundMe ? Visibility.Visible : Visibility.Collapsed;
 
         public bool HttpRequestLogging
         {
@@ -64,20 +54,8 @@ namespace Bloxstrap.UI.ViewModels.Menu
 
         public int FramerateLimit
         {
-            get => int.TryParse(App.FastFlags.GetPreset("Rendering.Framerate"), out int x) ? x : 0;
-            set => App.FastFlags.SetPreset("Rendering.Framerate", value == 0 ? null : value);
-        }
-
-        public IReadOnlyDictionary<RenderingMode, string> RenderingModes => FastFlagManager.RenderingModes;
-
-        public RenderingMode SelectedRenderingMode
-        {
-            get => App.FastFlags.GetPresetEnum(RenderingModes, "Rendering.Mode", "True");
-            set
-            {
-                App.FastFlags.SetPresetEnum("Rendering.Mode", RenderingModes[value], "True");
-                App.FastFlags.CheckManualFullscreenPreset();
-            }
+            get => int.TryParse(App.FastFlags.GetPreset("Rendering.Framerate"), out int x) ? x : 60;
+            set => App.FastFlags.SetPreset("Rendering.Framerate", value);
         }
 
         public bool FixDisplayScaling
@@ -92,26 +70,15 @@ namespace Bloxstrap.UI.ViewModels.Menu
             set => App.FastFlags.SetPreset("UI.Menu.GraphicsSlider", value ? "True" : null);
         }
 
-        public IReadOnlyDictionary<MaterialVersion, string> MaterialVersions => FastFlagManager.MaterialVersions;
-
-        public MaterialVersion SelectedMaterialVersion
+        public bool Pre2022TexturesEnabled
         {
-            get
-            {
-                MaterialVersion oldMaterials = App.FastFlags.GetPresetEnum(MaterialVersions, "Rendering.Materials", FastFlagManager.OldTexturesFlagValue);
-
-                if (oldMaterials != MaterialVersion.Default)
-                    return oldMaterials;
-
-                return App.FastFlags.GetPresetEnum(MaterialVersions, "Rendering.Materials", FastFlagManager.NewTexturesFlagValue);
-            }
-
-            set => App.FastFlags.SetPresetEnum("Rendering.Materials", MaterialVersions[value], MaterialVersions[value] == "NewTexturePack" ? FastFlagManager.OldTexturesFlagValue : FastFlagManager.NewTexturesFlagValue);
+            get => App.FastFlags.GetPreset("Rendering.TexturePack") == FastFlagManager.OldTexturesFlagValue;
+            set => App.FastFlags.SetPreset("Rendering.TexturePack", value ? FastFlagManager.OldTexturesFlagValue : null);
         }
 
-        public IReadOnlyDictionary<InGameMenuVersion, Dictionary<string, string?>> IGMenuVersions => FastFlagManager.IGMenuVersions;
+        public IReadOnlyDictionary<string, Dictionary<string, string?>> IGMenuVersions => FastFlagManager.IGMenuVersions;
 
-        public InGameMenuVersion SelectedIGMenuVersion
+        public string SelectedIGMenuVersion
         {
             get
             {
@@ -143,9 +110,9 @@ namespace Bloxstrap.UI.ViewModels.Menu
             }
         }
 
-        public IReadOnlyDictionary<LightingMode, string> LightingModes => FastFlagManager.LightingModes;
+        public IReadOnlyDictionary<string, string> LightingModes => FastFlagManager.LightingModes;
 
-        public LightingMode SelectedLightingMode
+        public string SelectedLightingMode
         {
             get => App.FastFlags.GetPresetEnum(LightingModes, "Rendering.Lighting", "True");
             set => App.FastFlags.SetPresetEnum("Rendering.Lighting", LightingModes[value], "True");

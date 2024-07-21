@@ -18,7 +18,7 @@ namespace Bloxstrap.UI.Elements.Dialogs
         {
             InitializeComponent();
 
-            TitleTextBlock.Text = string.Format(Bloxstrap.Resources.Strings.Dialog_Connectivity_UnableToConnect, targetName);
+            TitleTextBlock.Text = $"{App.ProjectName} is unable to connect to {targetName}";
             DescriptionTextBlock.Text = description;
 
             AddException(exception);

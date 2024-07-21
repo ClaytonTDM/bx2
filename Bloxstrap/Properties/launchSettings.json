@@ -22,10 +22,6 @@
     "Bloxstrap (Deeplink)": {
       "commandName": "Project",
       "commandLineArgs": "roblox://experiences/start?placeId=95206881"
-    },
-    "Bloxstrap (Studio Launch)": {
-      "commandName": "Project",
-      "commandLineArgs": "-ide"
     }
   }
 }

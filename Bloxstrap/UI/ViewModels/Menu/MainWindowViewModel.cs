@@ -7,24 +7,22 @@ using CommunityToolkit.Mvvm.Input;
 
 using Wpf.Ui.Mvvm.Contracts;
 
-using Bloxstrap.UI.Elements.Menu;
 using Bloxstrap.UI.Elements.Menu.Pages;
 
 namespace Bloxstrap.UI.ViewModels.Menu
 {
     public class MainWindowViewModel : NotifyPropertyChangedViewModel
     {
-        private readonly MainWindow _window;
+        private readonly Window _window;
 
         public ICommand CloseWindowCommand => new RelayCommand(CloseWindow);
         public ICommand ConfirmSettingsCommand => new RelayCommand(ConfirmSettings);
 
         public Visibility NavigationVisibility { get; set; } = Visibility.Visible;
-        public string ConfirmButtonText => App.IsFirstRun ? Resources.Strings.Menu_Install : Resources.Strings.Menu_Save;
-        public string CloseButtonText => App.IsFirstRun ? Resources.Strings.Common_Cancel : Resources.Strings.Common_Close;
+        public string ConfirmButtonText => App.IsFirstRun ? "Install" : "Save";
         public bool ConfirmButtonEnabled { get; set; } = true;
 
-        public MainWindowViewModel(MainWindow window)
+        public MainWindowViewModel(Window window)
         {
             _window = window;
         }
@@ -36,19 +34,15 @@ namespace Bloxstrap.UI.ViewModels.Menu
             if (!App.IsFirstRun)
             {
                 App.ShouldSaveConfigs = true;
-                App.Settings.Save();
-                App.State.Save();
                 App.FastFlags.Save();
-                App.ShouldSaveConfigs = false;
-
-                _window.SettingsSavedSnackbar.Show();
+                CloseWindow();
 
                 return;
             }
 
             if (string.IsNullOrEmpty(App.BaseDirectory))
             {
-                Frontend.ShowMessageBox(Resources.Strings.Menu_InstallLocation_NotSet, MessageBoxImage.Error);
+                Controls.ShowMessageBox("You must set an install location", MessageBoxImage.Error);
                 return;
             }
 
@@ -65,15 +59,15 @@ namespace Bloxstrap.UI.ViewModels.Menu
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    Frontend.ShowMessageBox(
-                        Resources.Strings.Menu_InstallLocation_NoWritePerms,
+                    Controls.ShowMessageBox(
+                        $"{App.ProjectName} does not have write access to the install location you've selected. Please choose another location.",
                         MessageBoxImage.Error
                     );
                     return;
                 }
                 catch (Exception ex)
                 {
-                    Frontend.ShowMessageBox(ex.Message, MessageBoxImage.Error);
+                    Controls.ShowMessageBox(ex.Message, MessageBoxImage.Error);
                     return;
                 }
 
@@ -81,8 +75,12 @@ namespace Bloxstrap.UI.ViewModels.Menu
                 {
                     string suggestedChange = Path.Combine(App.BaseDirectory, App.ProjectName);
 
-                    MessageBoxResult result = Frontend.ShowMessageBox(
-                        string.Format(Resources.Strings.Menu_InstallLocation_NotEmpty, suggestedChange),
+                    MessageBoxResult result = Controls.ShowMessageBox(
+                        $"The folder you've chosen to install {App.ProjectName} to already exists and is NOT empty. It is strongly recommended for {App.ProjectName} to be installed to its own independent folder.\n\n" +
+                        "Changing to the following location is suggested:\n" +
+                        $"{suggestedChange}\n\n" +
+                        "Would you like to change to the suggested location?\n" +
+                        "Selecting 'No' will ignore this warning and continue installation.",
                         MessageBoxImage.Warning,
                         MessageBoxButton.YesNoCancel,
                         MessageBoxResult.Yes
@@ -101,8 +99,8 @@ namespace Bloxstrap.UI.ViewModels.Menu
                     Directory.GetParent(App.BaseDirectory)!.ToString().ToLowerInvariant() == Paths.UserProfile.ToLowerInvariant() // prevent from installing to an essential user profile folder
                 )
                 {
-                    Frontend.ShowMessageBox(
-                        Resources.Strings.Menu_InstallLocation_CantInstall,
+                    Controls.ShowMessageBox(
+                        $"{App.ProjectName} cannot be installed here. Please choose a different location, or resort to using the default location by clicking the reset button.",
                         MessageBoxImage.Error,
                         MessageBoxButton.OK
                     );

@@ -24,7 +24,7 @@ namespace Bloxstrap.Utility
         {
             var fileInfo = new FileInfo(filePath);
 
-            if (!fileInfo.Exists || !fileInfo.IsReadOnly)
+            if (!fileInfo.IsReadOnly)
                 return;
 
             fileInfo.IsReadOnly = false;

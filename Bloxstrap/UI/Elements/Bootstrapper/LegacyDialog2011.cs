@@ -20,12 +20,6 @@ namespace Bloxstrap.UI.Elements.Bootstrapper
             set => ProgressBar.Style = value;
         }
 
-        protected override int _progressMaximum
-        {
-            get => ProgressBar.Maximum;
-            set => ProgressBar.Maximum = value;
-        }
-
         protected override int _progressValue
         {
             get => ProgressBar.Value;
@@ -43,7 +37,6 @@ namespace Bloxstrap.UI.Elements.Bootstrapper
             InitializeComponent();
 
             this.IconBox.BackgroundImage = App.Settings.Prop.BootstrapperIcon.GetIcon().ToBitmap();
-            this.buttonCancel.Text = Resources.Strings.Common_Cancel;
 
             ScaleWindow();
             SetupDialog();

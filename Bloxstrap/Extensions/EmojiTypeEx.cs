@@ -2,13 +2,13 @@
 {
     static class EmojiTypeEx
     {
-        public static IReadOnlyCollection<EmojiType> Selections => new EmojiType[]
+        public static IReadOnlyDictionary<string, EmojiType> Selections => new Dictionary<string, EmojiType>
         {
-            EmojiType.Default,
-            EmojiType.Catmoji,
-            EmojiType.Windows11,
-            EmojiType.Windows10,
-            EmojiType.Windows8
+            { "Default (Twemoji)", EmojiType.Default },
+            { "Catmoji", EmojiType.Catmoji },
+            { "Windows 11", EmojiType.Windows11 },
+            { "Windows 10", EmojiType.Windows10 },
+            { "Windows 8", EmojiType.Windows8 },
         };
 
         public static IReadOnlyDictionary<EmojiType, string> Filenames => new Dictionary<EmojiType, string>

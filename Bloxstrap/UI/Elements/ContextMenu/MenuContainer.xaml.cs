@@ -24,33 +24,28 @@ namespace Bloxstrap.UI.Elements.ContextMenu
         private readonly ActivityWatcher? _activityWatcher;
         private readonly DiscordRichPresence? _richPresenceHandler;
 
+        private LogTracer? _logTracerWindow;
         private ServerInformation? _serverInformationWindow;
-        private int? _processId;
 
-        public MenuContainer(ActivityWatcher? activityWatcher, DiscordRichPresence? richPresenceHandler, int? processId)
+        public MenuContainer(ActivityWatcher? activityWatcher, DiscordRichPresence? richPresenceHandler)
         {
             InitializeComponent();
             ApplyTheme();
 
             _activityWatcher = activityWatcher;
             _richPresenceHandler = richPresenceHandler;
-            _processId = processId;
 
             if (_activityWatcher is not null)
             {
-#if DEBUG
-                LogTracerMenuItem.Visibility = Visibility.Visible;
-#endif
-
+                if (App.Settings.Prop.OhHeyYouFoundMe)
+                    LogTracerMenuItem.Visibility = Visibility.Visible;
+             
                 _activityWatcher.OnGameJoin += ActivityWatcher_OnGameJoin;
                 _activityWatcher.OnGameLeave += ActivityWatcher_OnGameLeave;
             }
 
             if (_richPresenceHandler is not null)
                 RichPresenceMenuItem.Visibility = Visibility.Visible;
-
-            if (_processId is not null)
-                CloseRobloxMenuItem.Visibility = Visibility.Visible;
 
             VersionTextBlock.Text = $"{App.ProjectName} v{App.Version}";
         }
@@ -112,23 +107,16 @@ namespace Bloxstrap.UI.Elements.ContextMenu
 
         private void LogTracerMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Utilities.ShellExecute(_activityWatcher?.LogLocation!);
-        }
+            if (_logTracerWindow is null)
+            {
+                _logTracerWindow = new LogTracer(_activityWatcher!);
+                _logTracerWindow.Closed += (_, _) => _logTracerWindow = null;;
+            }
 
-        private void CloseRobloxMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBoxResult result = Frontend.ShowMessageBox(
-                Bloxstrap.Resources.Strings.ContextMenu_CloseRobloxMessage,
-                MessageBoxImage.Warning,
-                MessageBoxButton.YesNo
-            );
+            if (!_logTracerWindow.IsVisible)
+                _logTracerWindow.Show();
 
-            if (result != MessageBoxResult.Yes)
-                return;
-
-            using Process process = Process.GetProcessById((int)_processId!);
-            process.Kill();
-            process.Close();
+            _logTracerWindow.Activate();
         }
     }
 }

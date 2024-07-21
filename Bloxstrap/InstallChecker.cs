@@ -32,8 +32,8 @@ namespace Bloxstrap
 
                 _installLocation = Path.GetDirectoryName(Paths.Process)!;
 
-                var result = Frontend.ShowMessageBox(
-                    string.Format(Resources.Strings.InstallChecker_NotInstalledProperly, _installLocation), 
+                var result = Controls.ShowMessageBox(
+                    $"It appears as if {App.ProjectName} hasn't been properly installed. Is it supposed to be installed at {_installLocation}?", 
                     MessageBoxImage.Warning, 
                     MessageBoxButton.YesNo
                 );
@@ -74,8 +74,10 @@ namespace Bloxstrap
                 {
                     App.Logger.WriteLine(LOG_IDENT, $"Drive has changed from {driveName} to {newDriveName}");
 
-                    Frontend.ShowMessageBox(
-                        string.Format(Resources.Strings.InstallChecker_DriveLetterChangeDetected, driveName, newDriveName),
+                    Controls.ShowMessageBox(
+                        $"{App.ProjectName} has detected a drive letter change and has reconfigured its install location from the {driveName} drive to the {newDriveName} drive.\n" +
+                        "\n" +
+                        $"While {App.ProjectName} will continue to work, it's recommended that you change the drive leter back to its original value as other installed applications can experience similar issues.",
                         MessageBoxImage.Warning,
                         MessageBoxButton.OK
                     );
@@ -87,8 +89,8 @@ namespace Bloxstrap
                 {
                     App.Logger.WriteLine(LOG_IDENT, $"Drive {driveName} does not exist anymore, and has likely been removed");
 
-                    var result = Frontend.ShowMessageBox(
-                        string.Format(Resources.Strings.InstallChecker_InstallDriveMissing, driveName),
+                    var result = Controls.ShowMessageBox(
+                        $"{App.ProjectName} was originally installed to the {driveName} drive, but it appears to no longer be present. Would you like to continue and carry out a fresh install?",
                         MessageBoxImage.Warning,
                         MessageBoxButton.OKCancel
                     );
@@ -124,13 +126,13 @@ namespace Bloxstrap
             App.BaseDirectory = Path.Combine(Paths.LocalAppData, App.ProjectName);
             App.Logger.Initialize(true);
 
-            if (App.LaunchSettings.IsQuiet)
+            if (App.IsQuiet)
                 return;
 
             App.IsSetupComplete = false;
 
             App.FastFlags.Load();
-            Frontend.ShowMenu();
+            Controls.ShowMenu();
 
             // exit if we don't click the install button on installation
             if (App.IsSetupComplete)
@@ -159,14 +161,14 @@ namespace Bloxstrap
             MessageBoxResult result;
 
             // silently upgrade version if the command line flag is set or if we're launching from an auto update
-            if (App.LaunchSettings.IsUpgrade || isAutoUpgrade)
+            if (App.IsUpgrade || isAutoUpgrade)
             {
                 result = MessageBoxResult.Yes;
             }
             else
             {
-                result = Frontend.ShowMessageBox(
-                    Resources.Strings.InstallChecker_VersionDifferentThanInstalled,
+                result = Controls.ShowMessageBox(
+                    $"The version of {App.ProjectName} you've launched is different to the version you currently have installed.\nWould you like to upgrade your currently installed version?",
                     MessageBoxImage.Question,
                     MessageBoxButton.YesNo
                 );
@@ -210,7 +212,7 @@ namespace Bloxstrap
 
             // update migrations
 
-            if (App.BuildMetadata.CommitRef.StartsWith("tag") && currentVersionInfo.ProductVersion is not null)
+            if (App.BuildMetadata.CommitRef.StartsWith("tag"))
             {
                 if (existingVersionInfo.ProductVersion == "2.4.0")
                 { 
@@ -227,54 +229,36 @@ namespace Bloxstrap
 
                     App.FastFlags.Save();
                 }
-                else if (existingVersionInfo.ProductVersion == "2.5.4")
+                else if (existingVersionInfo.ProductVersion == "2.5.3")
                 {
-                    if (App.Settings.Prop.UseDisableAppPatch)
-                    {
-                        try
-                        { 
-                            File.Delete(Path.Combine(Paths.Modifications, "ExtraContent\\places\\Mobile.rbxl"));
-                        }
-                        catch (Exception ex)
-                        {
-                            App.Logger.WriteException(LOG_IDENT, ex);
-                        }
+                    App.FastFlags.SetValue("FFlagDebugGraphicsPreferD3D11", null);
+                    App.FastFlags.SetValue("FFlagDebugGraphicsPreferD3D11FL10", null);
+                    App.FastFlags.SetValue("FFlagDebugGraphicsPreferVulkan", null);
+                    App.FastFlags.SetValue("FFlagRenderVulkanFixMinimizeWindow", null);
+                    App.FastFlags.SetValue("FFlagDebugGraphicsPreferOpenGL", null);
 
-                        App.Settings.Prop.EnableActivityTracking = true;
-                    }
-
-                    if (App.Settings.Prop.BootstrapperStyle == BootstrapperStyle.ClassicFluentDialog)
-                        App.Settings.Prop.BootstrapperStyle = BootstrapperStyle.FluentDialog;
-
-                    _ = int.TryParse(App.FastFlags.GetPreset("Rendering.Framerate"), out int x);
-                    if (x == 0)
-                    {
-                        App.FastFlags.SetPreset("Rendering.Framerate", null);
-                        App.FastFlags.Save();
-                    }
-
-                    App.Settings.Save();
+                    App.FastFlags.Save();
                 }
             }
 
             if (isAutoUpgrade)
             {
                 App.NotifyIcon?.ShowAlert(
-                    string.Format(Resources.Strings.InstallChecker_Updated, currentVersionInfo.ProductVersion),
-                    Resources.Strings.InstallChecker_SeeWhatsNew,
+                    $"{App.ProjectName} has been upgraded to v{currentVersionInfo.ProductVersion}",
+                    "See what's new in this version",
                     30,
                     (_, _) => Utilities.ShellExecute($"https://github.com/{App.ProjectRepository}/releases/tag/v{currentVersionInfo.ProductVersion}")
                 );
             }
-            else if (!App.LaunchSettings.IsQuiet)
+            else if (!App.IsQuiet)
             {
-                Frontend.ShowMessageBox(
-                    string.Format(Resources.Strings.InstallChecker_Updated, currentVersionInfo.ProductVersion),
+                Controls.ShowMessageBox(
+                    $"{App.ProjectName} has been upgraded to v{currentVersionInfo.ProductVersion}",
                     MessageBoxImage.Information,
                     MessageBoxButton.OK
                 );
 
-                Frontend.ShowMenu();
+                Controls.ShowMenu();
 
                 App.Terminate();
             }

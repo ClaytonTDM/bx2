@@ -15,13 +15,13 @@ using System.Windows.Shapes;
 namespace Bloxstrap.UI.Elements.Dialogs
 {
     /// <summary>
-    /// Interaction logic for AddFlagDialog.xaml
+    /// Interaction logic for BulkAddFastFlagDialog.xaml
     /// </summary>
-    public partial class AddFastFlagDialog
+    public partial class BulkAddFastFlagDialog
     {
         public MessageBoxResult Result = MessageBoxResult.Cancel;
 
-        public AddFastFlagDialog()
+        public BulkAddFastFlagDialog()
         {
             InitializeComponent();
         }

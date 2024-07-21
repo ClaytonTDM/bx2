@@ -14,7 +14,7 @@ namespace Bloxstrap.UI.ViewModels.Menu
         {
             CustomIntegrations.Add(new CustomIntegration()
             {
-                Name = Resources.Strings.Menu_Integrations_Custom_NewIntegration
+                Name = "New Integration"
             });
 
             SelectedCustomIntegrationIndex = CustomIntegrations.Count - 1;
@@ -49,12 +49,10 @@ namespace Bloxstrap.UI.ViewModels.Menu
                 if (!value)
                 {
                     ShowServerDetailsEnabled = value;
-                    DisableAppPatchEnabled = value;
                     DiscordActivityEnabled = value;
                     DiscordActivityJoinEnabled = value;
 
                     OnPropertyChanged(nameof(ShowServerDetailsEnabled));
-                    OnPropertyChanged(nameof(DisableAppPatchEnabled));
                     OnPropertyChanged(nameof(DiscordActivityEnabled));
                     OnPropertyChanged(nameof(DiscordActivityJoinEnabled));
                 }
@@ -88,10 +86,10 @@ namespace Bloxstrap.UI.ViewModels.Menu
             set => App.Settings.Prop.HideRPCButtons = !value;
         }
 
-        public bool DisableAppPatchEnabled
+        public bool MultiInstanceLaunchingEnabled
         {
-            get => App.Settings.Prop.UseDisableAppPatch;
-            set => App.Settings.Prop.UseDisableAppPatch = value;
+            get => App.Settings.Prop.MultiInstanceLaunching;
+            set => App.Settings.Prop.MultiInstanceLaunching = value;
         }
 
         public ObservableCollection<CustomIntegration> CustomIntegrations

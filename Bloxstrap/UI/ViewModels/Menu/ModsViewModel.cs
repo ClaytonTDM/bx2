@@ -13,44 +13,24 @@ namespace Bloxstrap.UI.ViewModels.Menu
 
         private bool _usingCustomFont => App.IsFirstRun && App.CustomFontLocation is not null || !App.IsFirstRun && File.Exists(Paths.CustomFont);
 
-        private readonly Dictionary<string, byte[]> FontHeaders = new()
-        {
-            { "ttf", new byte[4] { 0x00, 0x01, 0x00, 0x00 } },
-            { "otf", new byte[4] { 0x4F, 0x54, 0x54, 0x4F } },
-            { "ttc", new byte[4] { 0x74, 0x74, 0x63, 0x66 } } 
-        };
-
         private void ManageCustomFont()
         {
             if (_usingCustomFont)
             {
                 if (App.IsFirstRun)
-                {
                     App.CustomFontLocation = null;
-                }
                 else
-                {
-                    Filesystem.AssertReadOnly(Paths.CustomFont);
                     File.Delete(Paths.CustomFont);
-                }
             }
             else
             {
                 var dialog = new OpenFileDialog
                 {
-                    Filter = $"{Resources.Strings.Menu_FontFiles}|*.ttf;*.otf;*.ttc"
+                    Filter = "Font files|*.ttf;*.otf|All files|*.*"
                 };
 
                 if (dialog.ShowDialog() != true)
                     return;
-
-                string type = dialog.FileName.Substring(dialog.FileName.Length-3, 3).ToLowerInvariant();
-
-                if (!File.ReadAllBytes(dialog.FileName).Take(4).SequenceEqual(FontHeaders[type]))
-                {
-                    Frontend.ShowMessageBox(Resources.Strings.Menu_Mods_Misc_CustomFont_Invalid, MessageBoxImage.Error);
-                    return;
-                }
 
                 if (App.IsFirstRun)
                 {
@@ -82,12 +62,12 @@ namespace Bloxstrap.UI.ViewModels.Menu
             set => App.Settings.Prop.UseOldCharacterSounds = value;
         }
 
-        public IReadOnlyCollection<Enums.CursorType> CursorTypes => CursorTypeEx.Selections;
+        public IReadOnlyDictionary<string, Enums.CursorType> CursorTypes => CursorTypeEx.Selections;
 
-        public Enums.CursorType SelectedCursorType
+        public string SelectedCursorType
         {
-            get => App.Settings.Prop.CursorType;
-            set => App.Settings.Prop.CursorType = value;
+            get => CursorTypes.FirstOrDefault(x => x.Value == App.Settings.Prop.CursorType).Key;
+            set => App.Settings.Prop.CursorType = CursorTypes[value];
         }
 
         public bool OldAvatarBackground
@@ -96,12 +76,18 @@ namespace Bloxstrap.UI.ViewModels.Menu
             set => App.Settings.Prop.UseOldAvatarBackground = value;
         }
 
-        public IReadOnlyCollection<EmojiType> EmojiTypes => EmojiTypeEx.Selections;
-
-        public EmojiType SelectedEmojiType
+        public bool DisableAppPatchEnabled
         {
-            get => App.Settings.Prop.EmojiType;
-            set => App.Settings.Prop.EmojiType = value;
+            get => App.Settings.Prop.UseDisableAppPatch;
+            set => App.Settings.Prop.UseDisableAppPatch = value;
+        }
+
+        public IReadOnlyDictionary<string, EmojiType> EmojiTypes => EmojiTypeEx.Selections;
+
+        public string SelectedEmojiType
+        {
+            get => EmojiTypes.FirstOrDefault(x => x.Value == App.Settings.Prop.EmojiType).Key;
+            set => App.Settings.Prop.EmojiType = EmojiTypes[value];
         }
 
         public Visibility ChooseCustomFontVisibility => _usingCustomFont ? Visibility.Collapsed : Visibility.Visible;

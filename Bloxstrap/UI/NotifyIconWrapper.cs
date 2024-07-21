@@ -1,4 +1,6 @@
-﻿using Bloxstrap.Integrations;
+﻿using System.Windows;
+
+using Bloxstrap.Integrations;
 using Bloxstrap.UI.Elements.ContextMenu;
 
 namespace Bloxstrap.UI
@@ -14,7 +16,6 @@ namespace Bloxstrap.UI
         
         private ActivityWatcher? _activityWatcher;
         private DiscordRichPresence? _richPresenceHandler;
-        private int? _processId;
 
         EventHandler? _alertClickHandler;
 
@@ -51,14 +52,6 @@ namespace Bloxstrap.UI
             if (App.Settings.Prop.ShowServerDetails)
                 _activityWatcher.OnGameJoin += (_, _) => Task.Run(OnGameJoin);
         }
-
-        public void SetProcessId(int processId)
-        {
-            if (_processId is not null)
-                return;
-
-            _processId = processId;
-        }
         #endregion
 
         #region Context menu
@@ -69,7 +62,7 @@ namespace Bloxstrap.UI
 
             App.Logger.WriteLine("NotifyIconWrapper::InitializeContextMenu", "Initializing context menu");
 
-            _menuContainer = new(_activityWatcher, _richPresenceHandler, _processId);
+            _menuContainer = new(_activityWatcher, _richPresenceHandler);
             _menuContainer.ShowDialog();
         }
 
@@ -89,9 +82,9 @@ namespace Bloxstrap.UI
             string serverLocation = await _activityWatcher!.GetServerLocation();
 
             ShowAlert(
-                String.Format(Resources.Strings.ContextMenu_ServerInformation_Notification_Title, _activityWatcher.ActivityServerType.ToTranslatedString().ToLower()),
-                String.Format(Resources.Strings.ContextMenu_ServerInformation_Notification_Text, serverLocation),
-                10,
+                $"Connected to {_activityWatcher.ActivityServerType.ToString().ToLower()} server", 
+                $"Located at {serverLocation}\nClick for more information", 
+                10, 
                 (_, _) => _menuContainer?.ShowServerInformationWindow()
             );
         }

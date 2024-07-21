@@ -2,11 +2,11 @@
 {
     static class CursorTypeEx
     {
-        public static IReadOnlyCollection<CursorType> Selections => new CursorType[]
+        public static IReadOnlyDictionary<string, CursorType> Selections => new Dictionary<string, CursorType>
         {
-            CursorType.Default,
-            CursorType.From2013,
-            CursorType.From2006
+            { "Default", CursorType.Default },
+            { "2013 (Angular)", CursorType.From2013 },
+            { "2006 (Cartoony)", CursorType.From2006 },
         };
     }
 }

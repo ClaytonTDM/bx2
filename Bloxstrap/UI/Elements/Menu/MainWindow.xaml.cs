@@ -1,6 +1,10 @@
 ﻿using System.Windows.Controls;
+
+using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui.Mvvm.Services;
+
 using Bloxstrap.UI.ViewModels.Menu;
 
 namespace Bloxstrap.UI.Elements.Menu
@@ -10,7 +14,7 @@ namespace Bloxstrap.UI.Elements.Menu
     /// </summary>
     public partial class MainWindow : INavigationWindow
     {
-        public MainWindow(bool showAlreadyRunningWarning)
+        public MainWindow()
         {
             InitializeComponent();
             ApplyTheme();
@@ -18,20 +22,6 @@ namespace Bloxstrap.UI.Elements.Menu
             App.Logger.WriteLine("MainWindow::MainWindow", "Initializing menu");
 
             DataContext = new MainWindowViewModel(this);
-
-#if DEBUG // easier access
-            PreInstallNavItem.Visibility = System.Windows.Visibility.Visible;
-            EditorWarningNavItem.Visibility = System.Windows.Visibility.Visible;
-#endif
-
-            if (showAlreadyRunningWarning)
-                _ = ShowAlreadyRunningSnackbar();
-        }
-
-        private async Task ShowAlreadyRunningSnackbar()
-        {
-            await Task.Delay(500); // wait for everything to finish loading
-            AlreadyRunningSnackbar.Show();
         }
 
         public void OpenWiki(object? sender, EventArgs e) => Utilities.ShellExecute($"https://github.com/{App.ProjectRepository}/wiki");

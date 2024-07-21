@@ -21,12 +21,6 @@ namespace Bloxstrap.UI.Elements.Bootstrapper
             set => ProgressBar.Style = value;
         }
 
-        protected override int _progressMaximum
-        {
-            get => ProgressBar.Maximum;
-            set => ProgressBar.Maximum = value;
-        }
-
         protected override int _progressValue
         {
             get => ProgressBar.Value;
@@ -42,8 +36,6 @@ namespace Bloxstrap.UI.Elements.Bootstrapper
         public LegacyDialog2008()
         {
             InitializeComponent();
-
-            this.buttonCancel.Text = Resources.Strings.Common_Cancel;
 
             ScaleWindow();
             SetupDialog();
